@@ -1,0 +1,56 @@
+import React, { Component } from 'react'
+
+
+class LinedTextArea extends Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      token: "",
+      current: 0,
+      lines: []
+    }
+  }
+
+  addLine = (line, index) =>
+    this.setState({
+      lines: [
+        ...this.state.lines.slice(0, index),
+        {
+          line: line,
+          ref: React.createRef(),
+        },
+        ...this.state.lines.slice(index + 1),
+      ]})
+
+  renderLine = (line, index) =>
+    <div className="LinedTextArea__line">
+      <label className="LinedTextArea__line__label">
+        {(index + 1) || "+"}
+      </label>
+      <input
+        ref={line.ref}
+        className="LinedTextArea__line__input"
+        // onKeyPress={e => e.keyCode === '13' && line.line.length > 0 && this.addLine("", index + 1)}
+        value={line.line}
+        onChange={e => this.setState({
+          lines: [
+            ...this.state.lines.slice(0, index),
+            e.target.value,
+            ...this.state.lines.slice(index + 1),
+          ]})}
+      />
+    </div>
+
+  render = () =>
+    <div className="LinedTextArea">
+      <div className="LinedTextArea__content">
+        {this.lines.map((line, index) =>
+          this.renderLine(line, index)
+        )}
+      </div>
+    </div>
+}
+
+
+export default LinedTextArea
