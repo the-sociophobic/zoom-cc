@@ -39,6 +39,7 @@ class App extends Component {
     if (current >= text.split("\n").length)
       return
 
+    console.log(text.split("\n"))
     window.history.replaceState(null, null, "/zoom-cc/#" + counter)
     postCC({
       // string: lines[current].string,
@@ -49,28 +50,28 @@ class App extends Component {
     this.setState({current: current + 1, counter: counter + 1})
   }
 
-  addLineAt = props =>
-    this.setState({
-      lines: [
-        ...this.state.lines.slice(0, props.index),
-        props.line,
-        ...this.state.lines.slice(props.index + 1),
-      ]})
+  // addLineAt = props =>
+  //   this.setState({
+  //     lines: [
+  //       ...this.state.lines.slice(0, props.index),
+  //       props.line,
+  //       ...this.state.lines.slice(props.index + 1),
+  //     ]})
 
-  updateLineAt = props =>
-    this.setState({
-      lines: [
-        ...this.state.lines.slice(0, props.index - 1),
-        props.line,
-        ...this.state.lines.slice(props.index + 1),
-      ]})
+  // updateLineAt = props =>
+  //   this.setState({
+  //     lines: [
+  //       ...this.state.lines.slice(0, props.index - 1),
+  //       props.line,
+  //       ...this.state.lines.slice(props.index + 1),
+  //     ]})
 
-  deleteLine = index =>
-    this.setState({
-      lines: [
-        ...this.state.lines.slice(0, index),
-        ...this.state.lines.slice(index + 1),
-      ]})
+  // deleteLine = index =>
+  //   this.setState({
+  //     lines: [
+  //       ...this.state.lines.slice(0, index),
+  //       ...this.state.lines.slice(index + 1),
+  //     ]})
 
 
   render = () =>
@@ -87,7 +88,7 @@ class App extends Component {
         Текущий субтитр: {this.state.current === 0 ?
           ""
           :
-          (this.state.current < this.state.text.split("\n").length && this.state.text.split("\n")[this.state.current - 1])
+          (this.state.current <= this.state.text.split("\n").length && this.state.text.split("\n")[this.state.current - 1])
         }
       </div>
       <div className="container">
@@ -101,12 +102,16 @@ class App extends Component {
         <textarea
           className="LinedTextArea"
           value={this.state.text}
-          onChange={value => this.setState({text: value})}
+          onChange={e => this.setState({text: e.target.value})}
         />
       </div>
       <div className="container">
         <button
-          disabled={this.state.APIToken.length === 0 || this.state.lines.length === 0}
+          // disabled={this.state.APIToken.length === 0 || this.state.lines.length === 0}
+          disabled={this.state.APIToken.length === 0 ||
+            this.state.text.length === 0 ||
+            this.state.current >= this.state.text.split("\n").length
+          }
           className="button button--main"
           onClick={() => this.next()}
         >
