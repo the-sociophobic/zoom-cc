@@ -18,6 +18,9 @@ export default class Input extends Component {
         this.props.onChange(value.replace(/[^0-9]/g, ''))
     this.props.onKeyDown && this.props.onKeyDown(e)
   }
+  onFocus = e => {
+    this.props.onFocus && this.props.onFocus(e)
+  }
   onBlur = e => {
     this.props.onBlur && this.props.onBlur(e)
   }
@@ -29,33 +32,23 @@ export default class Input extends Component {
         (this.props.errorMessage && "form-group--error")
       }
     >
-      <div className="position-relative">
-        <input
-          ref={this.inputFieldRef}
-          type={this.props.number ? "number" : "text"}
-          className="form-group__input"
-          placeholder={this.props.placeholder}
-          required={this.props.required}
-          value={this.props.value}
-          onChange={event => this.props.onChange(event.target.value)}
-          onFocus={this.props.onFocus}
-          onBlur={this.onBlur}
-          onKeyDown={this.onKeyDown}
-          disabled={this.props.disabled}
-        />
+      <input
+        ref={this.inputFieldRef}
+        type={this.props.number ? "number" : "text"}
+        className="form-group__input"
+        placeholder={this.props.placeholder}
+        required={this.props.required}
+        value={this.props.value}
+        onChange={event => this.props.onChange(event.target.value)}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
+        onKeyDown={this.onKeyDown}
+        disabled={this.props.disabled}
+      />
+      {this.props.label &&
         <label className="form-group__label">
           {this.props.label}
-        </label>
-        {this.props.showReset && this.props.value.length > 0 &&
-          <div
-            className="reset"
-            onClick={() => {
-              this.focus()
-              this.props.onChange(null)
-            }}
-          />
-        }
-      </div>
+        </label>}
     </div>
   )
 }

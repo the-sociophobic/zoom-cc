@@ -1,0 +1,104 @@
+@import '~bootstrap/scss/bootstrap.scss'
+
+.App
+  @extend .d-flex 
+  @extend .flex-column 
+  @extend .justify-content-around
+  width: 100vw
+  height: 100vh
+  overflow: hidden
+
+$input-height: 24px
+
+.input
+  width: 100%
+  line-height: $input-height
+  padding: 0 10px
+  font-size: 14px
+  outline: none
+  border: none
+  background: white
+  -webkit-appearance: none
+
+.form-group
+  // padding: 14px 10px 0
+  // margin: 2px 0 10px
+  position: relative
+  margin-bottom: 0
+  &__label
+    position: absolute
+    font-size: 12px
+    top: -15px
+    left: 15px
+  &__input
+    @extend .input
+    border: 2px solid gray
+    border-radius: 3px
+    position: relative
+    &::placeholder
+      color: #b1b1b1
+
+.button
+  cursor: pointer
+  outline: none
+  border: none
+  background-color: white
+  &:disabled
+    opacity: .5
+    cursor: not-allowed
+  &--main
+    width: 100%
+    padding: 10px 0
+    text-align: center
+    font-weight: 600
+    color: white
+    background-color: black
+  &--cross
+    position: absolute
+    top: 5px
+    right: 15px
+    width: 20px
+    height: 20px
+    z-index: 1000
+    &::after, &::before
+      content: ""
+      position: absolute
+      top: 10px
+      left: 0
+      background-color: black
+      width: 15px
+      height: 2px
+    &::after
+      transform: rotate(45deg)
+    &::before
+      transform: rotate(-45deg)
+
+
+.LinedTextArea
+  width: 100%
+  height: 50vh
+  overflow-y: scroll
+  border: 1px solid gray
+  &__content
+    width: 100%
+    display: table
+  &__line
+    position: relative
+    cursor: caret
+    // &:not(:last-child)
+    border-bottom: 1px solid gray
+    &--past
+      opacity: .25
+    .input
+      width: calc(100% - 30px)
+      line-height: 18px
+      border: none
+    &__index
+      font-size: 10px
+      line-height: 1
+      color: gray
+      cursor: caret
+      padding: 3px 10px 0px
+    &__delete
+      @extend .button
+      @extend .button--cross
