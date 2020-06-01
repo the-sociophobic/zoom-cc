@@ -27,7 +27,7 @@ class App extends Component {
     this.state = {
       APIToken: "",
       current: 0,
-      counter: parseInt(window.location.pathname.replace("/", "")) || 1,
+      counter: parseInt(window.location.pathname.replace(/[^0-9]/g, '')) || 1,
       lines: testCC,
       text: "В это текстовое поле можно вбить свои субтитры.\nКаждая новая строка будет отдельным субтитром\nЧтобы в ZOOM отобразилась следующая строка, нажмите NEXT\nЭту страницу не стоит перезагружать, иначе всё может сбиться и сломаться\n"
     }
@@ -35,11 +35,11 @@ class App extends Component {
 
   next = () => {
     const { current, counter, lines, text, APIToken } = this.state
-    
+
     if (current >= text.split("\n").length)
       return
 
-    window.history.replaceState(null, null, "/" + counter)
+    window.history.replaceState(null, null, "/zoom-cc/" + counter)
     postCC({
       // string: lines[current].string,
       string: text.split("\n")[current],
