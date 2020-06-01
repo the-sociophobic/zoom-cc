@@ -27,7 +27,7 @@ class App extends Component {
     this.state = {
       APIToken: "",
       current: 0,
-      counter: parseInt(window.location.pathname.replace(/[^0-9]/g, '')) || 1,
+      counter: parseInt(window.location.hash.replace(/[^0-9]/g, '')) || 1,
       lines: testCC,
       text: "В это текстовое поле можно вбить свои субтитры.\nКаждая новая строка будет отдельным субтитром\nЧтобы в ZOOM отобразилась следующая строка, нажмите NEXT\nЭту страницу не стоит перезагружать, иначе всё может сбиться и сломаться\n"
     }
