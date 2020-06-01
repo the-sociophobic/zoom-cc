@@ -2,9 +2,10 @@
 import axios from 'axios'
 
 
-axios.defaults.headers.post['Host'] = "wmcapi.zoom.us:81"
+// axios.defaults.headers.post['Host'] = "wmcapi.zoom.us:81"
 axios.defaults.headers.post['Accept'] = "*/*"
-axios.defaults.headers.post['Content-Type'] = "text/plain"
+// axios.defaults.headers.post['Content-Type'] = "text/plain"
+axios.defaults.headers.post['Content-Type'] = "json"
 
 var countCC = 360
 
@@ -14,8 +15,12 @@ const requestLink = props =>
 const postCC = props => 
   axios
     .post(
-      requestLink(props),
-      props.string + "\n"
+      "https://schedule.tochkadostupa.spb.ru/zoom-cc",
+      // "http://localhost:3000/zoom-cc",
+      {
+        URL: requestLink(props),
+        string: props.string + "\n"
+      }
     ).then(a => console.log(a.data))
 
 

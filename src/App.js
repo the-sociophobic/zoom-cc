@@ -27,19 +27,26 @@ class App extends Component {
     this.state = {
       APIToken: "",
       current: 0,
+      counter: parseInt(window.location.pathname.replace("/", "")) || 1,
       lines: testCC,
+      text: "В это текстовое поле можно вбить свои субтитры.\nКаждая новая строка будет отдельным субтитром\nЧтобы в ZOOM отобразилась следующая строка, нажмите NEXT\nЭту страницу не стоит перезагружать, иначе всё может сбиться и сломаться\n"
     }
   }
 
   next = () => {
-    const { current, lines, APIToken } = this.state
-    window.history.replaceState(null, null, "/" + (current + 1))
+    const { current, counter, lines, text, APIToken } = this.state
+    
+    if (current >= text.split("\n").length)
+      return
+
+    window.history.replaceState(null, null, "/" + counter)
     postCC({
-      string: lines[current].string,
-      count: current + 2,
+      // string: lines[current].string,
+      string: text.split("\n")[current],
+      count: counter,
       APIToken: APIToken,
     })
-    this.setState({current: current + 1})
+    this.setState({current: current + 1, counter: counter + 1})
   }
 
   addLineAt = props =>
@@ -77,12 +84,24 @@ class App extends Component {
         />
       </div>
       <div className="container">
-        <LinedTextArea
+        Текущий субтитр: {this.state.current === 0 ?
+          ""
+          :
+          (this.state.current < this.state.text.split("\n").length && this.state.text.split("\n")[this.state.current - 1])
+        }
+      </div>
+      <div className="container">
+        {/* <LinedTextArea
           lines={this.state.lines}
           current={this.state.current}
           addLineAt={this.addLineAt}
           updateLineAt={this.updateLineAt}
           deleteLine={this.deleteLine}
+        /> */}
+        <textarea
+          className="LinedTextArea"
+          value={this.state.text}
+          onChange={value => this.setState({text: value})}
         />
       </div>
       <div className="container">
