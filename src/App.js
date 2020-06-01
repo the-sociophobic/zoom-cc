@@ -39,7 +39,7 @@ class App extends Component {
     if (current >= text.split("\n").length)
       return
 
-    window.history.replaceState(null, null, "/zoom-cc/" + counter)
+    window.history.replaceState(null, null, "/zoom-cc/#" + counter)
     postCC({
       // string: lines[current].string,
       string: text.split("\n")[current],
