@@ -1,9 +1,6 @@
 @import '~bootstrap/scss/bootstrap.scss'
 
 .App
-  @extend .d-flex 
-  @extend .flex-column 
-  @extend .justify-content-around
   width: 100vw
   height: 100vh
   overflow: hidden
@@ -74,31 +71,40 @@ $input-height: 24px
       transform: rotate(-45deg)
 
 
-.LinedTextArea
+.login
   width: 100%
-  height: 50vh
-  overflow-y: scroll
-  border: 1px solid gray
-  &__content
+  height: 100%
+  @extend .d-flex
+  @extend .flex-column
+  @extend .justify-content-center
+  @extend .align-items-center
+
+.loader
+  width: 100%
+  height: 100%
+  background-color: rgba(255, 255, 255, .5)
+  cursor: not-allowed
+
+.control
+  width: 100%
+  height: 100%
+  .container
+    height: 100%
+    @extend .d-flex
+    @extend .flex-column
+    @extend .justify-content-between
+  &__header
     width: 100%
-    display: table
-  &__line
-    position: relative
-    cursor: caret
-    // &:not(:last-child)
-    border-bottom: 1px solid gray
-    &--past
-      opacity: .25
-    .input
-      width: calc(100% - 30px)
-      line-height: 18px
-      border: none
-    &__index
-      font-size: 10px
-      line-height: 1
-      color: gray
-      cursor: caret
-      padding: 3px 10px 0px
-    &__delete
-      @extend .button
-      @extend .button--cross
+    height: 80px
+    @extend .d-flex
+    @extend .flex-row
+    @extend .justify-content-between
+    &__token
+    &__exit
+  &__subtitles
+    @extend .flex-grow-1
+    width: 100%
+    overflow-y: scroll
+  &__next
+    width: 100%
+    height: 80px

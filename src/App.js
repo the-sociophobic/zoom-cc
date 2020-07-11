@@ -1,10 +1,21 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+
+import axios from 'axios'
+import { format } from 'date-fns'
 
 import Input from 'components/Input'
-import LinedTextArea from 'components/LinedTextArea'
-import { postCC } from 'utils/fns'
 
 import 'styles/index.sass'
+
+
+axios.defaults.headers.post['Accept'] = "*/*"
+axios.defaults.headers.post['Content-Type'] = "json"
+
+const serverURL = process.env.NODE_ENV === 'production' ?
+  "https://schedule.tochkadostupa.spb.ru/zoom-cc/"
+  :
+  "http://localhost:3000/zoom-cc/"
 
 
 const testCC = [
@@ -21,103 +32,212 @@ const testCC = [
   ref: React.createRef()
 }))
 
+
 class App extends Component {
   constructor(props) {
     super(props)
+
+    const APIToken = window.localStorage.getItem('APIToken')
+
     this.state = {
-      APIToken: "",
-      current: 0,
-      counter: parseInt(window.location.hash.replace(/[^0-9]/g, '')) || 1,
-      lines: testCC,
-      text: "В это текстовое поле можно вбить свои субтитры.\nКаждая новая строка будет отдельным субтитром\nЧтобы в ZOOM отобразилась следующая строка, нажмите NEXT\nЭту страницу не стоит перезагружать, иначе всё может сбиться и сломаться\n"
+      APIToken: APIToken || "",
+      APITokenInput: "",
+      subtitles: [],
+      loading: false,
     }
   }
 
-  next = () => {
-    const { current, counter, lines, text, APIToken } = this.state
+  componentDidMount = () =>
+    this.login(this.state.APIToken)
 
-    if (current >= text.split("\n").length)
-      return
-
-    console.log(text.split("\n"))
-    window.history.replaceState(null, null, "/zoom-cc/#" + counter)
-    postCC({
-      // string: lines[current].string,
-      string: text.split("\n")[current],
-      count: counter,
-      APIToken: APIToken,
-    })
-    this.setState({current: current + 1, counter: counter + 1})
+  activateLoader = async fn => {
+    this.setState({loading: true})
+    await fn()
+    this.setState({loading: false})
   }
 
-  // addLineAt = props =>
-  //   this.setState({
-  //     lines: [
-  //       ...this.state.lines.slice(0, props.index),
-  //       props.line,
-  //       ...this.state.lines.slice(props.index + 1),
-  //     ]})
+  tryPost = async (URL, props) =>
+    await this.activateLoader(async () => {
+      const res = (await axios.post(URL, props)).data
 
-  // updateLineAt = props =>
-  //   this.setState({
-  //     lines: [
-  //       ...this.state.lines.slice(0, props.index - 1),
-  //       props.line,
-  //       ...this.state.lines.slice(props.index + 1),
-  //     ]})
+      if (res.error) {
+        console.log(res.error)
+        return
+      }
+  
+      console.log(res)
+      this.setState({
+        subtitles: res.map(sub => ({
+          ...sub,
+          ref: React.createRef()
+        }))
+      })
+    })
 
-  // deleteLine = index =>
-  //   this.setState({
-  //     lines: [
-  //       ...this.state.lines.slice(0, index),
-  //       ...this.state.lines.slice(index + 1),
-  //     ]})
+  login = async APIToken => {
+    if (APIToken) {
+      await this.tryPost(
+        serverURL + "login",
+        { APIToken: APIToken })
+
+      this.setState({APIToken: APIToken})
+      window.localStorage.setItem('APIToken', APIToken)
+    }
+  }
+
+  logout = () => {
+    window.localStorage.removeItem('APIToken')
+    this.setState({
+      APIToken: undefined,
+      subtitles: [],
+    })
+  }
+
+  next = async () =>
+    await this.tryPost(
+      serverURL + "next",
+      { APIToken: this.state.APIToken })
+
+  saveSubtitle = async sub => 
+    await this.tryPost(
+      serverURL + "save",
+      sub)
+
+  deleteSubtitle = async sub => 
+    await this.tryPost(
+      serverURL + "delete",
+      sub)
+
+  swapSubtitles = async (sub0, sub1) =>
+    await this.tryPost(
+      serverURL + "swap",
+      { subtitle0: sub0.id, subtitle1: sub1.id })
+
+  insertSubtitle = index => {
+    this.setState({
+      subtitles: [
+        ...this.state.subtitles.slice(0, index + 1),
+        {
+          line: "",
+          number: index + 1,
+          APIToken: this.state.APIToken,
+          ref: React.createRef()
+        },
+        ...this.state.subtitles.slice(index + 1)
+      ]
+    })
+  }
+
+
+  renderLoading = () =>
+    this.state.loading &&
+      <div className="loader" />
+
+  renderLogin = () =>
+    <div className="login">
+      <div className="container">
+        <Input
+          value={this.state.APITokenInput}
+          onChange={value => this.setState({APITokenInput: value})}
+          label="ZOOM API token"
+          placeholder="Скопируйте и вставьте ZOOM API token из приложения"
+        />
+        <button
+          className="button button--main"
+          onClick={() => this.login(this.state.APITokenInput)}
+        >
+          войти
+        </button>
+      </div>
+    </div>
+
+  renderControl = () =>
+    <div className="control">
+      <div className="container">
+        <div className="control__header">
+          <div className="control__header__token">
+            {this.state.APIToken}
+          </div>
+          <button
+            className="control__header__exit"
+            onClick={() => this.logout()}
+          >
+            выйти
+          </button>
+        </div>
+
+        {this.renderSubtitles()}
+
+        <div className="control__next">
+          <button
+            disabled={this.state.subtitles.filter(sub => !sub.posted).length > 0}
+            className="button button--main"
+            onClick={() => this.next()}
+          >
+            NEXT
+          </button>
+        </div>
+      </div>
+    </div>
+
+  renderSubtitles = () =>
+    <div className="control__subtitles">
+      {this.state.subtitles.map((sub, index) =>
+        <div className={`control__subtitles__item ${sub.posted && "control__subtitles__item--posted"}`}>
+          <div className="control__subtitles__item__number">
+            {sub.number}.
+          </div>
+          <Input
+            key={sub.id || sub.number}
+            className="control__subtitles__item__input"
+            value={sub.line}
+            onChange={value => this.setState({
+              subtitles: [
+                ...this.state.subtitles.slice(0, index),
+                {
+                  ...sub,
+                  line: value,
+                },
+                ...this.state.subtitles.slice(index + 1),
+              ]
+            })}
+            onBlur={() => this.saveSubtitle(sub)}
+          />
+          <div className="control__subtitles__item__buttons">
+            {sub.posted ?
+              format(new Date(sub.posted), 'HH:mm:ss')
+              :
+              <>
+                <button
+                  className="button button--transparent"
+                  onClick={() => this.insertSubtitle(sub)}
+                >
+                  +
+                </button>
+                <button
+                  className="button button--transparent"
+                  onClick={() => this.deleteSubtitle(sub)}
+                >
+                  -
+                </button>
+              </>
+            }
+          </div>
+        </div>
+      )}
+    </div>
 
 
   render = () =>
     <div className="App">
-      <div className="container">
-        <Input
-          value={this.state.APIToken}
-          onChange={value => this.setState({APIToken: value})}
-          label="ZOOM API token"
-          placeholder="Скопируйте и вставьте ZOOM API token из приложения"
-        />
-      </div>
-      <div className="container">
-        Текущий субтитр: {this.state.current === 0 ?
-          ""
-          :
-          (this.state.current <= this.state.text.split("\n").length && this.state.text.split("\n")[this.state.current - 1])
-        }
-      </div>
-      <div className="container">
-        {/* <LinedTextArea
-          lines={this.state.lines}
-          current={this.state.current}
-          addLineAt={this.addLineAt}
-          updateLineAt={this.updateLineAt}
-          deleteLine={this.deleteLine}
-        /> */}
-        <textarea
-          className="LinedTextArea"
-          value={this.state.text}
-          onChange={e => this.setState({text: e.target.value})}
-        />
-      </div>
-      <div className="container">
-        <button
-          // disabled={this.state.APIToken.length === 0 || this.state.lines.length === 0}
-          disabled={this.state.APIToken.length === 0 ||
-            this.state.text.length === 0 ||
-            this.state.current >= this.state.text.split("\n").length
-          }
-          className="button button--main"
-          onClick={() => this.next()}
-        >
-          NEXT
-        </button>
-      </div>
+      {this.state.APIToken ?
+        this.renderControl()
+        :
+        this.renderLogin()}
+
+      {ReactDOM.createPortal(
+        this.renderLoading(),
+        document.body)}
     </div>
 }
 
