@@ -106,6 +106,8 @@ class App extends Component {
     this.setState({
       APIToken: undefined,
       subtitles: [],
+      APITokenInput: "",
+      initialText: "",
     })
   }
 
