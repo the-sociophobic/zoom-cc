@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom'
 
 import axios from 'axios'
 import { format } from 'date-fns'
+import _ from 'lodash'
 
+import model from 'utils/models/subtitle'
 import Input from 'components/Input'
 
 import 'styles/index.sass'
@@ -18,18 +20,20 @@ const serverURL = process.env.NODE_ENV === 'production' ?
   "http://localhost:3000/zoom-cc/"
 
 
-const testCC = [
-  "Я в рот ебал твою мать, ",
-  "Пойду насру ей на грудь.",
-  "Я не хочу её ебать,",
-  "Лучше мочи пойти хлебнуть.",
-  "Говно вкусней её стряпни.",
-  "А пук лучше звучит,",
-  "Чем голос этой хуерги.",
-  "Пойди и ёбни ей с ноги.",
-].map(string => ({
-  string: string,
-  ref: React.createRef()
+const testCC = `
+  Я в рот ебал твою мать,
+  Пойду насру ей на грудь.
+  Я не хочу её ебать,
+  Лучше мочи пойти хлебнуть.
+  Говно вкусней её стряпни.
+  А пук лучше звучит,
+  Чем голос этой хуерги.
+  Пойди и ёбни ей с ноги.
+`
+.split('\n')
+.map(string => ({
+  line: string,
+  ref: React.createRef(),
 }))
 
 
@@ -43,6 +47,7 @@ class App extends Component {
       APIToken: APIToken || "",
       APITokenInput: "",
       subtitles: [],
+      initialText: "",
       loading: false,
     }
   }
@@ -53,6 +58,10 @@ class App extends Component {
   activateLoader = async fn => {
     this.setState({loading: true})
     await fn()
+    this.state.subtitles
+      .forEach(sub =>
+        sub.ref.current &&
+          (sub.ref.current.style = ''))
     this.setState({loading: false})
   }
 
@@ -62,12 +71,19 @@ class App extends Component {
 
       if (res.error) {
         console.log(res.error)
+        alert("Произошла ошибка. Проверьте консоль")
         return
       }
   
-      console.log(res)
       this.setState({
-        subtitles: res.map(sub => ({
+        subtitles: [
+          ...res,
+          {
+            APIToken: this.state.APIToken,
+            number: res.length === 0 ? 1 : res[res.length - 1].number + 1,
+            line: ""
+          }
+        ].map(sub => ({
           ...sub,
           ref: React.createRef()
         }))
@@ -98,34 +114,37 @@ class App extends Component {
       serverURL + "next",
       { APIToken: this.state.APIToken })
 
-  saveSubtitle = async sub => 
+  saveSubtitle = async sub =>
     await this.tryPost(
       serverURL + "save",
-      sub)
+      { subtitle: _.pick(sub, _.keys(model)) })
 
   deleteSubtitle = async sub => 
     await this.tryPost(
       serverURL + "delete",
-      sub)
+      { subtitle: _.pick(sub, _.keys(model)) })
 
   swapSubtitles = async (sub0, sub1) =>
     await this.tryPost(
       serverURL + "swap",
       { subtitle0: sub0.id, subtitle1: sub1.id })
 
-  insertSubtitle = index => {
+  insertSubtitle = (prevSub, index) => {
     this.setState({
       subtitles: [
         ...this.state.subtitles.slice(0, index + 1),
         {
           line: "",
-          number: index + 1,
+          number: prevSub.number + 1,
           APIToken: this.state.APIToken,
-          ref: React.createRef()
+          ref: React.createRef(),
         },
         ...this.state.subtitles.slice(index + 1)
       ]
     })
+    setTimeout(() =>
+      this.state.subtitles[index + 1].ref.current.focus()
+    , 200)
   }
 
 
@@ -143,7 +162,7 @@ class App extends Component {
           placeholder="Скопируйте и вставьте ZOOM API token из приложения"
         />
         <button
-          className="button button--main"
+          className="button button--main mt-3"
           onClick={() => this.login(this.state.APITokenInput)}
         >
           войти
@@ -156,7 +175,8 @@ class App extends Component {
       <div className="container">
         <div className="control__header">
           <div className="control__header__token">
-            {this.state.APIToken}
+            {this.state.APIToken
+              .slice(this.state.APIToken.indexOf('id'))}
           </div>
           <button
             className="control__header__exit"
@@ -170,7 +190,9 @@ class App extends Component {
 
         <div className="control__next">
           <button
-            disabled={this.state.subtitles.filter(sub => !sub.posted).length > 0}
+            disabled={
+              this.state.subtitles.filter(sub => !sub.posted).length === 0 ||
+              !this.state.subtitles.filter(sub => !sub.posted)[0].id}
             className="button button--main"
             onClick={() => this.next()}
           >
@@ -182,49 +204,106 @@ class App extends Component {
 
   renderSubtitles = () =>
     <div className="control__subtitles">
-      {this.state.subtitles.map((sub, index) =>
-        <div className={`control__subtitles__item ${sub.posted && "control__subtitles__item--posted"}`}>
-          <div className="control__subtitles__item__number">
-            {sub.number}.
-          </div>
-          <Input
-            key={sub.id || sub.number}
-            className="control__subtitles__item__input"
-            value={sub.line}
-            onChange={value => this.setState({
-              subtitles: [
-                ...this.state.subtitles.slice(0, index),
-                {
-                  ...sub,
-                  line: value,
-                },
-                ...this.state.subtitles.slice(index + 1),
-              ]
-            })}
-            onBlur={() => this.saveSubtitle(sub)}
+      {this.state.subtitles.length === 0 || !this.state.subtitles[0].id ?
+        <>
+          <textarea
+            className="control__subtitles__textarea"
+            value={this.state.initialText}
+            onChange={e => this.setState({initialText: e.target.value})}
+            placeholder="введите текст и нажмите сохранить"
           />
-          <div className="control__subtitles__item__buttons">
-            {sub.posted ?
-              format(new Date(sub.posted), 'HH:mm:ss')
-              :
-              <>
-                <button
-                  className="button button--transparent"
-                  onClick={() => this.insertSubtitle(sub)}
-                >
-                  +
-                </button>
-                <button
-                  className="button button--transparent"
-                  onClick={() => this.deleteSubtitle(sub)}
-                >
-                  -
-                </button>
-              </>
-            }
-          </div>
-        </div>
-      )}
+          <button
+            className="button button--main"
+            disabled={this.state.initialText.length === 0}
+            onClick={() => this.saveSubtitle({
+              line: this.state.initialText,
+              APIToken: this.state.APIToken,
+              number: 1,
+            })}
+          >
+            сохранить
+          </button>
+        </>
+        :
+        this.state.subtitles
+          .map((sub, index) =>
+            <div
+              key={sub.id || sub.number}
+              className={`control__subtitles__item ${sub.posted && "control__subtitles__item--posted"}`}
+            >
+              <div className="control__subtitles__item__number">
+                {sub.id && `${sub.number}.`}
+              </div>
+              {sub.posted ?
+                <>
+                  <div className="control__subtitles__item__input">
+                    {sub.line}
+                  </div>
+                  <div className="control__subtitles__item__posted">
+                    {format(new Date(sub.posted), 'HH:mm:ss')}
+                  </div>
+                </>
+                :
+                <>
+                  <textarea
+                    ref={sub.ref}
+                    className="control__subtitles__item__input"
+                    value={sub.line}
+                    rows={1}
+                    onKeyDown={e =>
+                      e.keyCode === 27 &&
+                      (sub.ref.current && sub.ref.current.blur())}
+                    onChange={e => {
+                      this.setState({
+                        subtitles: [
+                          ...this.state.subtitles.slice(0, index),
+                          {
+                            ...sub,
+                            line: e.target.value,
+                          },
+                          ...this.state.subtitles.slice(index + 1),
+                        ]
+                      })
+
+                      if (e.target.value.includes('\n'))
+                        sub.ref.current.style.height = "200px"
+                    }}
+                    onBlur={() => this.saveSubtitle(sub)}
+                  />
+                  <div className="control__subtitles__item__buttons">
+                    <button
+                      className="button button--transparent"
+                      disabled={!sub.id || index > this.state.subtitles.length - 3}
+                      onClick={() => this.insertSubtitle(sub, index)}
+                    >
+                      +
+                    </button>
+                    <button
+                      className="button button--transparent"
+                      disabled={!sub.id}
+                      onClick={() => this.deleteSubtitle(sub)}
+                    >
+                      -
+                    </button>
+                    <button
+                      className="button button--transparent"
+                      disabled={!sub.id || index === this.state.subtitles.length - 2}
+                      onClick={() => this.swapSubtitles(sub, this.state.subtitles[index + 1])}
+                    >
+                      ⇩
+                    </button>
+                    <button
+                      className="button button--transparent"
+                      disabled={!sub.id || index === 0 || this.state.subtitles[index - 1].posted !== 0}
+                      onClick={() => this.swapSubtitles(sub, this.state.subtitles[index - 1])}
+                    >
+                      ↑
+                    </button>
+                  </div>
+                </>
+              }
+            </div>
+          )}
     </div>
 
 

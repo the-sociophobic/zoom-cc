@@ -5,10 +5,11 @@
   height: 100vh
   overflow: hidden
 
-$input-height: 24px
+$input-height: 30px
 
 .input
   width: 100%
+  // height: $input-height
   line-height: $input-height
   padding: 0 10px
   font-size: 14px
@@ -25,11 +26,11 @@ $input-height: 24px
   &__label
     position: absolute
     font-size: 12px
-    top: -15px
+    top: -25px
     left: 15px
   &__input
     @extend .input
-    border: 2px solid gray
+    border: 1px solid gray
     border-radius: 3px
     position: relative
     &::placeholder
@@ -37,7 +38,7 @@ $input-height: 24px
 
 .button
   cursor: pointer
-  outline: none
+  outline: none !important
   border: none
   background-color: white
   &:disabled
@@ -80,6 +81,9 @@ $input-height: 24px
   @extend .align-items-center
 
 .loader
+  position: fixed
+  top: 0
+  left: 0
   width: 100%
   height: 100%
   background-color: rgba(255, 255, 255, .5)
@@ -95,16 +99,55 @@ $input-height: 24px
     @extend .justify-content-between
   &__header
     width: 100%
-    height: 80px
+    height: 30px
+    @extend .mb-2
     @extend .d-flex
     @extend .flex-row
     @extend .justify-content-between
     &__token
+      @extend .flex-grow-1
+      white-space: nowrap
+      text-overflow: ellipsis
+      overflow: hidden
     &__exit
+      @extend .button
+      font-weight: 900
   &__subtitles
     @extend .flex-grow-1
+    @extend .d-flex
+    @extend .flex-column
     width: 100%
     overflow-y: scroll
+    &__item
+      width: 100%
+      @extend .d-flex
+      @extend .flex-row
+      &--posted
+        opacity: .5
+        cursor: not-allowed
+      &__number
+        width: 50px
+      &__input
+        @extend .flex-grow-1
+        // .input
+        height: 25px
+        line-height: 25px
+        border: none
+        border-bottom: 1px solid gray
+        border-radius: 0
+        padding: 0 10px
+      &__buttons
+        @extend .ml-2
+        @extend .d-flex
+        @extend .flex-row
+      &__posted
+        @extend .ml-2
+        width: 70px
+    &__textarea
+      @extend .flex-grow-1
+      width: 100%
+      @extend .mb-2
+      @extend .p-2
   &__next
+    @extend .my-2
     width: 100%
-    height: 80px
