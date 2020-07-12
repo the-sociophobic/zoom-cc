@@ -20,22 +20,6 @@ const serverURL = process.env.NODE_ENV === 'production' ?
   "http://localhost:3000/zoom-cc/"
 
 
-const testCC = `
-  Я в рот ебал твою мать,
-  Пойду насру ей на грудь.
-  Я не хочу её ебать,
-  Лучше мочи пойти хлебнуть.
-  Говно вкусней её стряпни.
-  А пук лучше звучит,
-  Чем голос этой хуерги.
-  Пойди и ёбни ей с ноги.
-`
-.split('\n')
-.map(string => ({
-  line: string,
-  ref: React.createRef(),
-}))
-
 
 class App extends Component {
   constructor(props) {
@@ -187,10 +171,14 @@ class App extends Component {
             выйти
           </button>
         </div>
+      </div>
 
+      <div className="control__content">
         {this.renderSubtitles()}
+      </div>
 
-        <div className="control__next">
+      <div className="control__next">
+        <div className="container">
           <button
             disabled={
               this.state.subtitles.filter(sub => !sub.posted).length === 0 ||
@@ -205,107 +193,109 @@ class App extends Component {
     </div>
 
   renderSubtitles = () =>
-    <div className="control__subtitles">
-      {this.state.subtitles.length === 0 || !this.state.subtitles[0].id ?
-        <>
-          <textarea
-            className="control__subtitles__textarea"
-            value={this.state.initialText}
-            onChange={e => this.setState({initialText: e.target.value})}
-            placeholder="введите текст и нажмите сохранить"
-          />
-          <button
-            className="button button--main"
-            disabled={this.state.initialText.length === 0}
-            onClick={() => this.saveSubtitle({
-              line: this.state.initialText,
-              APIToken: this.state.APIToken,
-              number: 1,
-            })}
-          >
-            сохранить
-          </button>
-        </>
-        :
-        this.state.subtitles
-          .map((sub, index) =>
-            <div
-              key={sub.id || sub.number}
-              className={`control__subtitles__item ${sub.posted && "control__subtitles__item--posted"}`}
+    <div className="container">
+      <div className="control__subtitles">
+        {this.state.subtitles.length === 0 || !this.state.subtitles[0].id ?
+          <>
+            <textarea
+              className="control__subtitles__textarea"
+              value={this.state.initialText}
+              onChange={e => this.setState({initialText: e.target.value})}
+              placeholder="введите текст и нажмите сохранить"
+            />
+            <button
+              className="button button--main"
+              disabled={this.state.initialText.length === 0}
+              onClick={() => this.saveSubtitle({
+                line: this.state.initialText,
+                APIToken: this.state.APIToken,
+                number: 1,
+              })}
             >
-              <div className="control__subtitles__item__number">
-                {sub.id && `${sub.number}.`}
-              </div>
-              {sub.posted ?
-                <>
-                  <div className="control__subtitles__item__input">
-                    {sub.line}
-                  </div>
-                  <div className="control__subtitles__item__posted">
-                    {format(new Date(sub.posted), 'HH:mm:ss')}
-                  </div>
-                </>
-                :
-                <>
-                  <textarea
-                    ref={sub.ref}
-                    className="control__subtitles__item__input"
-                    value={sub.line}
-                    rows={1}
-                    onKeyDown={e =>
-                      e.keyCode === 27 &&
-                      (sub.ref.current && sub.ref.current.blur())}
-                    onChange={e => {
-                      this.setState({
-                        subtitles: [
-                          ...this.state.subtitles.slice(0, index),
-                          {
-                            ...sub,
-                            line: e.target.value,
-                          },
-                          ...this.state.subtitles.slice(index + 1),
-                        ]
-                      })
+              сохранить
+            </button>
+          </>
+          :
+          this.state.subtitles
+            .map((sub, index) =>
+              <div
+                key={sub.id || sub.number}
+                className={`control__subtitles__item ${sub.posted && "control__subtitles__item--posted"}`}
+              >
+                <div className="control__subtitles__item__number">
+                  {sub.id && `${sub.number}.`}
+                </div>
+                {sub.posted ?
+                  <>
+                    <div className="control__subtitles__item__input">
+                      {sub.line}
+                    </div>
+                    <div className="control__subtitles__item__posted">
+                      {format(new Date(sub.posted), 'HH:mm:ss')}
+                    </div>
+                  </>
+                  :
+                  <>
+                    <textarea
+                      ref={sub.ref}
+                      className="control__subtitles__item__input"
+                      value={sub.line}
+                      rows={1}
+                      onKeyDown={e =>
+                        e.keyCode === 27 &&
+                        (sub.ref.current && sub.ref.current.blur())}
+                      onChange={e => {
+                        this.setState({
+                          subtitles: [
+                            ...this.state.subtitles.slice(0, index),
+                            {
+                              ...sub,
+                              line: e.target.value,
+                            },
+                            ...this.state.subtitles.slice(index + 1),
+                          ]
+                        })
 
-                      if (e.target.value.includes('\n'))
-                        sub.ref.current.style.height = "200px"
-                    }}
-                    onBlur={() => this.saveSubtitle(sub)}
-                  />
-                  <div className="control__subtitles__item__buttons">
-                    <button
-                      className="button button--transparent"
-                      disabled={!sub.id || index > this.state.subtitles.length - 3}
-                      onClick={() => this.insertSubtitle(sub, index)}
-                    >
-                      +
-                    </button>
-                    <button
-                      className="button button--transparent"
-                      disabled={!sub.id}
-                      onClick={() => this.deleteSubtitle(sub)}
-                    >
-                      -
-                    </button>
-                    <button
-                      className="button button--transparent"
-                      disabled={!sub.id || index === this.state.subtitles.length - 2}
-                      onClick={() => this.swapSubtitles(sub, this.state.subtitles[index + 1])}
-                    >
-                      ⇩
-                    </button>
-                    <button
-                      className="button button--transparent"
-                      disabled={!sub.id || index === 0 || this.state.subtitles[index - 1].posted !== 0}
-                      onClick={() => this.swapSubtitles(sub, this.state.subtitles[index - 1])}
-                    >
-                      ↑
-                    </button>
-                  </div>
-                </>
-              }
-            </div>
-          )}
+                        if (e.target.value.includes('\n'))
+                          sub.ref.current.style.height = "200px"
+                      }}
+                      onBlur={() => this.saveSubtitle(sub)}
+                    />
+                    <div className="control__subtitles__item__buttons">
+                      <button
+                        className="button button--transparent"
+                        disabled={!sub.id || index > this.state.subtitles.length - 3}
+                        onClick={() => this.insertSubtitle(sub, index)}
+                      >
+                        +
+                      </button>
+                      <button
+                        className="button button--transparent"
+                        disabled={!sub.id}
+                        onClick={() => this.deleteSubtitle(sub)}
+                      >
+                        -
+                      </button>
+                      <button
+                        className="button button--transparent"
+                        disabled={!sub.id || index === this.state.subtitles.length - 2}
+                        onClick={() => this.swapSubtitles(sub, this.state.subtitles[index + 1])}
+                      >
+                        ⇩
+                      </button>
+                      <button
+                        className="button button--transparent"
+                        disabled={!sub.id || index === 0 || this.state.subtitles[index - 1].posted !== 0}
+                        onClick={() => this.swapSubtitles(sub, this.state.subtitles[index - 1])}
+                      >
+                        ↑
+                      </button>
+                    </div>
+                  </>
+                }
+              </div>
+            )}
+      </div>
     </div>
 
 
