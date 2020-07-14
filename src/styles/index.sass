@@ -1,9 +1,35 @@
 @import '~bootstrap/scss/bootstrap.scss'
 
 .App
+  @extend .d-flex
+  @extend .flex-column
   width: 100vw
   height: 100vh
   overflow: hidden
+  &__header, &__select
+    @extend .container
+    @extend .d-flex
+    @extend .align-items-center
+    width: 100%
+    .button
+      @extend .mb-4
+      font-weight: 600
+      transition: transform .3s
+      opacity: .5
+      &:hover
+        transform: scale(1.25)
+      &--selected
+        opacity: 1
+  &__header
+    @extend .flex-row
+    @extend .justify-content-between
+    height: 60px
+  &__select
+    @extend .flex-column
+    @extend .justify-content-center
+    height: 100%
+
+
 
 $input-height: 30px
 
@@ -72,77 +98,130 @@ $input-height: 30px
       transform: rotate(-45deg)
 
 
-.login
-  width: 100%
-  height: 100%
-  @extend .d-flex
-  @extend .flex-column
-  @extend .justify-content-center
-  @extend .align-items-center
 
-.loader
-  position: fixed
-  top: 0
-  left: 0
-  width: 100%
-  height: 100%
-  background-color: rgba(255, 255, 255, .5)
-  cursor: not-allowed
 
-.control
+//OLD VERSION
+.OldVersion
   width: 100%
   height: 100%
-  &__header
+  overflow: hidden
+  .LinedTextArea
     width: 100%
-    height: 30px
-    @extend .mb-2
-    @extend .d-flex
-    @extend .flex-row
-    @extend .justify-content-between
-    &__token
-      @extend .flex-grow-1
-      white-space: nowrap
-      text-overflow: ellipsis
-      overflow: hidden
-    &__exit
-      @extend .button
-      font-weight: 900
-  &__subtitles
-    @extend .flex-grow-1
+    height: 50vh
+    overflow-y: scroll
+    border: 1px solid gray
+    &__content
+      width: 100%
+      display: table
+    &__line
+      position: relative
+      cursor: caret
+      // &:not(:last-child)
+      border-bottom: 1px solid gray
+      &--past
+        opacity: .25
+      .input
+        width: calc(100% - 30px)
+        line-height: 18px
+        border: none
+      &__index
+        font-size: 10px
+        line-height: 1
+        color: gray
+        cursor: caret
+        padding: 3px 10px 0px
+      &__delete
+        @extend .button
+        @extend .button--cross
+  
+  
+  
+  
+//NEW VERSION
+.NewVersion
+  width: 100%
+  overflow-y: scroll
+  @extend .flex-grow-1
+  .login
+    width: 100%
+    height: 100%
     @extend .d-flex
     @extend .flex-column
+    @extend .justify-content-center
+    @extend .align-items-center
+
+  .loader
+    position: fixed
+    top: 0
+    left: 0
     width: 100%
-    overflow-y: scroll
-    &__item
+    height: 100%
+    background-color: rgba(255, 255, 255, .5)
+    cursor: not-allowed
+
+  .control
+    width: 100%
+    height: 100%
+    @extend .d-flex
+    @extend .flex-column
+    &__header
       width: 100%
+      height: 30px
+      @extend .mb-2
       @extend .d-flex
       @extend .flex-row
-      &--posted
-        opacity: .5
-        cursor: not-allowed
-      &__number
-        width: 50px
-      &__input
+      @extend .justify-content-between
+      &__token
         @extend .flex-grow-1
-        // .input
-        height: 25px
-        line-height: 25px
-        border: none
-        border-bottom: 1px solid gray
-        border-radius: 0
-        padding: 0 10px
-      &__buttons
-        @extend .ml-2
+        white-space: nowrap
+        text-overflow: ellipsis
+        overflow: hidden
+      &__exit
+        @extend .button
+        font-weight: 900
+    &__content
+      width: 100%
+      @extend .flex-grow-1
+      @extend .d-flex
+      @extend .flex-column
+      overflow-y: scroll
+    &__subtitles
+      @extend .flex-grow-1
+      @extend .d-flex
+      @extend .flex-column
+      width: 100%
+      overflow-y: scroll
+      &__item
+        width: 100%
         @extend .d-flex
         @extend .flex-row
-      &__posted
-        @extend .ml-2
-        width: 70px
-    &__textarea
-      @extend .flex-grow-1
+        &--posted
+          opacity: .5
+          cursor: not-allowed
+        &__number
+          width: 50px
+        &__input
+          @extend .flex-grow-1
+          // .input
+          height: 25px
+          line-height: 20px
+          border: none
+          border-bottom: 1px solid gray
+          border-radius: 0
+          padding: 0 10px
+        &__buttons
+          @extend .ml-2
+          @extend .d-flex
+          @extend .flex-row
+        &__posted
+          @extend .ml-2
+          width: 70px
+      &__textarea
+        @extend .flex-grow-1
+        @extend .mb-2
+        @extend .p-2
+        min-height: 50vh
+        width: 100%
+    &__next
+      @extend .my-2
       width: 100%
-      @extend .mb-2
-      @extend .p-2
-  &__next
-    @extend .my-2
-    width: 100%
