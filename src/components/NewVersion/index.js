@@ -8,6 +8,7 @@ import _ from 'lodash'
 import model from './models/subtitle'
 import Input from 'components/Input'
 import serverURL from 'utils/serverURL'
+import copyToClipboard from 'utils/copyToClipboard'
 
 import 'styles/index.sass'
 
@@ -23,9 +24,17 @@ class NewVersion extends React.Component {
     const APIToken = window.localStorage.getItem('APIToken')
 
     this.state = {
-      APIToken: APIToken || "",
       APITokenInput: "",
+      APIToken: APIToken || "",
       subtitles: [],
+      // APIToken: APIToken || "a",
+      // subtitles: [
+      //   {id: 1, number: 1, line: "a", posted: true },
+      //   {id: 2, number: 2, line: "b" },
+      //   {id: 3, number: 3, line: "c" },
+      //   {id: 4, number: 4, line: "d" },
+      //   {id: 5, number: 5, line: "e" },
+      // ],
       initialText: "",
       loading: false,
     }
@@ -50,7 +59,7 @@ class NewVersion extends React.Component {
 
       if (res.error) {
         console.log(res.error)
-        alert("Произошла ошибка. Проверьте консоль")
+        alert("Error: check the console")
         return
       }
   
@@ -140,13 +149,13 @@ class NewVersion extends React.Component {
           value={this.state.APITokenInput}
           onChange={value => this.setState({APITokenInput: value})}
           label="ZOOM API token"
-          placeholder="Скопируйте и вставьте ZOOM API token из приложения"
+          placeholder="Copy the API token from Zoom. Paste it here"
         />
         <button
           className="button button--main mt-3"
           onClick={() => this.login(this.state.APITokenInput)}
         >
-          войти
+          Log in
         </button>
       </div>
     </div>
@@ -163,7 +172,7 @@ class NewVersion extends React.Component {
             className="control__header__exit"
             onClick={() => this.logout()}
           >
-            выйти
+            Log out
           </button>
         </div>
       </div>
@@ -196,7 +205,7 @@ class NewVersion extends React.Component {
               className="control__subtitles__textarea"
               value={this.state.initialText}
               onChange={e => this.setState({initialText: e.target.value})}
-              placeholder="введите текст и нажмите сохранить"
+              placeholder="Enter text and press «save». Each line will be a separate subtitle"
             />
             <button
               className="button button--main"
@@ -207,7 +216,7 @@ class NewVersion extends React.Component {
                 number: 1,
               })}
             >
-              сохранить
+              save
             </button>
           </>
           :
@@ -225,6 +234,11 @@ class NewVersion extends React.Component {
                     <div className="control__subtitles__item__input">
                       {sub.line}
                     </div>
+                    <button
+                      className="button button--control button--copy"
+                      onClick={() => copyToClipboard(sub.line)}
+                      data-toggle="tooltip" data-placement="bottom" title="copy this subtitles text to clipboard"
+                    />
                     <div className="control__subtitles__item__posted">
                       {format(new Date(sub.posted), 'HH:mm:ss')}
                     </div>
@@ -258,33 +272,29 @@ class NewVersion extends React.Component {
                     />
                     <div className="control__subtitles__item__buttons">
                       <button
-                        className="button button--transparent"
+                        className="button button--control button--add"
                         disabled={!sub.id || index > this.state.subtitles.length - 3}
                         onClick={() => this.insertSubtitle(sub, index)}
-                      >
-                        +
-                      </button>
+                        data-toggle="tooltip" data-placement="bottom" title="add new subtitle after that one"
+                      />
                       <button
-                        className="button button--transparent"
+                        className="button button--control button--remove"
                         disabled={!sub.id}
                         onClick={() => this.deleteSubtitle(sub)}
-                      >
-                        -
-                      </button>
+                        data-toggle="tooltip" data-placement="bottom" title="remove this subtitle"
+                      />
                       <button
-                        className="button button--transparent"
+                        className="button button--control button--down"
                         disabled={!sub.id || index === this.state.subtitles.length - 2}
                         onClick={() => this.swapSubtitles(sub, this.state.subtitles[index + 1])}
-                      >
-                        ⇩
-                      </button>
+                        data-toggle="tooltip" data-placement="bottom" title="move this subtitle down"
+                      />
                       <button
-                        className="button button--transparent"
+                        className="button button--control button--up"
                         disabled={!sub.id || index === 0 || this.state.subtitles[index - 1].posted !== 0}
                         onClick={() => this.swapSubtitles(sub, this.state.subtitles[index - 1])}
-                      >
-                        ↑
-                      </button>
+                        data-toggle="tooltip" data-placement="bottom" title="move this subtitle up"
+                      />
                     </div>
                   </>
                 }

@@ -68,7 +68,7 @@ $input-height: 30px
   border: none
   background-color: white
   &:disabled
-    opacity: .5
+    opacity: .15
     cursor: not-allowed
   &--main
     width: 100%
@@ -96,6 +96,24 @@ $input-height: 30px
       transform: rotate(45deg)
     &::before
       transform: rotate(-45deg)
+  &--control
+    width: 25px
+    height: 25px
+    background-position: center
+    background-repeat: no-repeat
+    background-size: 65%
+  &--add
+    background-image: url('./img/add.svg')
+  &--remove
+    background-image: url('./img/remove.svg')
+  &--down
+    background-image: url('./img/down.svg')
+  &--up
+    background-image: url('./img/up.svg')
+  &--copy
+    @extend .ml-2
+    background-image: url('./img/copy.svg')
+    
 
 
 
@@ -179,6 +197,7 @@ $input-height: 30px
       &__exit
         @extend .button
         font-weight: 900
+        white-space: nowrap
     &__content
       width: 100%
       @extend .flex-grow-1
@@ -196,8 +215,10 @@ $input-height: 30px
         @extend .d-flex
         @extend .flex-row
         &--posted
-          opacity: .5
-          cursor: not-allowed
+          .control__subtitles__item__input,
+          .control__subtitles__item__posted
+            opacity: .5
+            cursor: not-allowed
         &__number
           width: 50px
         &__input
@@ -214,8 +235,7 @@ $input-height: 30px
           @extend .d-flex
           @extend .flex-row
         &__posted
-          @extend .ml-2
-          width: 70px
+          width: 75px
       &__textarea
         @extend .flex-grow-1
         @extend .mb-2

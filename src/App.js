@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import $ from 'jquery'
 
 import NewVersion from 'components/NewVersion'
 import OldVersion from 'components/OldVersion'
@@ -10,7 +11,8 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    const currentVersion = window.localStorage.getItem('currentVersion')
+    // const currentVersion = window.localStorage.getItem('currentVersion')
+    const currentVersion = "new"
 
     this.state = {
       currentVersion: currentVersion
@@ -53,7 +55,8 @@ class App extends Component {
     </div>
 
   renderHeader = () =>
-    this.renderButtons("App__header")
+    // this.renderButtons("App__header")
+    ""
 
   renderSelect = () =>
     this.renderButtons("App__select")
@@ -80,6 +83,11 @@ class App extends Component {
     )    
   }
 }
+
+
+// $(function () {
+//   $('[data-toggle="tooltip"]').tooltip()
+// })
 
 
 export default App
